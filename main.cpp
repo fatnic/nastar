@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include <SFML/Graphics.hpp>
+#include "pathfinder.hpp"
 
 std::vector<std::string> getBaseGrid(std::string filename)
 {
@@ -57,6 +58,9 @@ std::vector<sf::RectangleShape> createCells(std::vector<std::vector<int>> grid)
                 break;
             case 3:
                 rect.setFillColor(sf::Color::Magenta);
+                break;
+            case 4:
+                rect.setFillColor(sf::Color::Red);
                 break;
             default:
                 rect.setFillColor(sf::Color::Black);
@@ -117,6 +121,14 @@ int main()
         std::vector<std::vector<int>> grid = createGrid(baseGrid);
         grid[start.y][start.x] = 2;
         grid[goal.y][goal.x] = 3;
+
+         PathFinder pathfinder(grid, 32, 32);
+         pathfinder.setStart(start.x, start.y);
+         pathfinder.setGoal(goal.x, goal.y);
+         std::vector<sf::Vector2i> path = pathfinder.find();
+         for(sf::Vector2i point : path)
+            grid[point.y][point.x] = 4;
+
         std::vector<sf::RectangleShape> cells = createCells(grid);
 
         window.clear();

@@ -5,4 +5,8 @@ CONFIG -= qt
 
 LIBS += -lsfml-system -lsfml-window -lsfml-graphics
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    pathfinder.cpp
+
+HEADERS += \
+    pathfinder.hpp

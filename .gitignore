@@ -1,0 +1,13 @@
+*.pri
+*.pro.user
+build
+*.sln
+*.vcxproj
+*.filters
+*.vcxproj.user
+*.sdf
+*.opensdf
+*.suo
+*.dll
+x64
+Debug

@@ -100,7 +100,6 @@ int main()
                     start.x -= 1;
                 if(event.key.code == sf::Keyboard::D)
                     start.x += 1;
-                std::cout << start.x << ":" << start.y << std::endl;
             }
         }
 
@@ -122,11 +121,12 @@ int main()
         grid[start.y][start.x] = 2;
         grid[goal.y][goal.x] = 3;
 
-         PathFinder pathfinder(grid, 32, 32);
-         pathfinder.setStart(start.x, start.y);
-         pathfinder.setGoal(goal.x, goal.y);
-         std::vector<sf::Vector2i> path = pathfinder.find();
-         for(sf::Vector2i point : path)
+        PathFinder pathfinder(grid, 32, 32);
+        pathfinder.setStart(start.x, start.y);
+        pathfinder.setGoal(goal.x, goal.y);
+        std::vector<sf::Vector2i> path = pathfinder.find();
+
+        for(sf::Vector2i point : path)
             grid[point.y][point.x] = 4;
 
         std::vector<sf::RectangleShape> cells = createCells(grid);

@@ -103,10 +103,10 @@ int main()
             }
         }
 
-        if (start.x < 0)  { start.x = 0; }
-        if (start.x > 19) { start.x = 19;}
-        if (start.y < 0)  { start.y = 0; }
-        if (start.y > 19) { start.y = 19;}
+        if (start.x < 1)  { start.x = 1; }
+        if (start.x > 20) { start.x = 20;}
+        if (start.y < 1)  { start.y = 1; }
+        if (start.y > 20) { start.y = 20;}
 
         if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
         {
@@ -118,8 +118,8 @@ int main()
         }
 
         std::vector<std::vector<int>> grid = createGrid(baseGrid);
-        grid[start.y][start.x] = 2;
-        grid[goal.y][goal.x] = 3;
+        grid[start.y-1][start.x-1] = 2;
+        grid[goal.y-1][goal.x-1] = 3;
 
         PathFinder pathfinder(grid, 32, 32);
         pathfinder.setStart(start.x, start.y);
@@ -127,7 +127,7 @@ int main()
         std::vector<sf::Vector2i> path = pathfinder.find();
 
         for(sf::Vector2i point : path)
-            grid[point.y][point.x] = 4;
+            grid[point.y-1][point.x-1] = 4;
 
         std::vector<sf::RectangleShape> cells = createCells(grid);
 

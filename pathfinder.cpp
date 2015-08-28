@@ -28,54 +28,62 @@ std::vector<sf::Vector2i> PathFinder::find()
 
     while(!openList.empty())
     {
-        std::sort(openList.begin(), openList.end(), sortNodes);
-        current = openList[0];
+//        std::sort(openList.begin(), openList.end(), sortNodes);
+        openList.sort(sortNodes);
+        current = openList.front();
         openList.erase(openList.begin());
         closedList.push_back(current);
 
-        if(current.equal(goal))
+        if(current.parent != nullptr)
         {
-            std::cout << "found goal" << std::endl;
+            std::cout << "I'm am currently (" << current.cell.x << ":" << current.cell.y <<") and my parent is (";
+            std::cout << current.parent->cell.x << ":" << current.parent->cell.y << ")\n";
+        }
+
+        if(current.equals(goal))
+        {
+            std::cout << "found\n";
             while(current.parent != nullptr)
             {
-                // parent == current so always adds last node. fix this!!!
                 finalPath.push_back(current.cell);
                 current = *current.parent;
             }
-            openList.clear();
-            closedList.clear();
-
             return finalPath;
         }
 
         for (int i = 0; i < 9; i++)
         {
-            if (i == 4) continue;
+            if (i == 4)
+                continue;
 
             int x = current.cell.x;
             int y = current.cell.y;
+
             int xi = (i % 3) - 1;
             int yi = (i / 3) - 1;
 
-            if (x+xi < 0 || x+xi > xSize) continue;
-            if (y+yi < 0 || y+yi > ySize) continue;
+            sf::Vector2i cCell(x + xi, y + yi);
 
-            int at = grid[y + yi][x + xi];
+            if (blocked(cCell))
+                continue;
 
-            if (blocked(at)) continue;
+            float G = distance(start, cCell);
+            float H = distance(cCell, goal);
 
-            sf::Vector2i a(x + xi, y + yi);
-            float G = current.G + distance(current.cell, a);
-            float H = distance(a, goal);
-
-            if(vectorInList(closedList, a)) continue;
-            if(!vectorInList(openList, a) || G < current.G)
+            if(vectorInList(closedList, cCell))
             {
-                PathNode node(a, &current, G, H);
-                openList.push_back(node);
+                continue;
+            }
+
+            if(!vectorInList(openList, cCell)  && G >= current.G)
+            {
+                PathNode newNode(cCell, &current, G, H);
+                openList.push_back(newNode);
             }
         }
+
     }
+
     closedList.clear();
     return finalPath;
 }
@@ -92,17 +100,30 @@ bool PathFinder::sortNodes(PathNode n0, PathNode n1)
     return (n0.F < n1.F);
 }
 
-bool PathFinder::blocked(int tile)
+bool PathFinder::blocked(sf::Vector2i cell)
 {
-    if (tile == 1)
+    int cellValue = grid[cell.y-1][cell.x-1];
+    if (cellValue == 1)
+    {
         return true;
+    }
+
+    if (cell.x < 1 || cell.x > xSize || cell.y < 1 || cell.y > ySize)
+    {
+        return true;
+    }
+
     return false;
 }
 
-bool PathFinder::vectorInList(std::vector<PathNode> list, sf::Vector2i node)
+bool PathFinder::vectorInList(std::list<PathNode> list, sf::Vector2i node)
 {
     for (PathNode& cell : list)
-        if (cell.equal(node)) return true;
-
+    {
+        if (cell.equals(node))
+        {
+            return true;
+        }
+    }
     return false;
 }

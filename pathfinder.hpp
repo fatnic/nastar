@@ -20,6 +20,7 @@ public:
     std::vector<sf::Vector2i> consideredList;
 private:
     float distance(sf::Vector2i cell0, sf::Vector2i cell1);
+    float manhattenDistance(sf::Vector2i cell0, sf::Vector2i cell1);
     static bool sortNodes(PathNode *n0, PathNode *n1);
     bool blocked(sf::Vector2i cell);
     bool vectorInList(std::vector<PathNode *> list, sf::Vector2i cell);

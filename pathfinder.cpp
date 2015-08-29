@@ -63,11 +63,11 @@ std::vector<sf::Vector2i> PathFinder::find()
             if(blocked(cCell)) continue;
 
             float G = distance(start, cCell);
-            float H = distance(cCell, goal);
+            float H = manhattenDistance(cCell, goal);
 
             if(vectorInList(closedList, cCell)) continue;
 
-            if(!vectorInList(openList, cCell) && G >= current->G)
+            if(!vectorInList(openList, cCell) || current->F + 1 + H < G)
             {
                 consideredList.push_back(cCell);
                 PathNode *newNode = new PathNode(cCell, current, G, H);
@@ -84,6 +84,13 @@ float PathFinder::distance(sf::Vector2i cell0, sf::Vector2i cell1)
     float dX = cell0.x - cell1.x;
     float dY = cell0.y - cell1.y;
     return std::sqrt(dX * dX + dY * dY);
+}
+
+float PathFinder::manhattenDistance(sf::Vector2i cell0, sf::Vector2i cell1)
+{
+    float x = (float)(std::fabs((float)(cell0.x - cell1.x)));
+    float y = (float)(std::fabs((float)(cell0.y - cell1.y)));
+    return x + y;
 }
 
 bool PathFinder::sortNodes(PathNode* n0, PathNode* n1)

@@ -86,6 +86,10 @@ int main()
     sf::Vector2i start(10,18);
     sf::Vector2i goal(16,7);
 
+    bool moved = true;
+    std::vector<sf::Vector2i> path;
+    std::vector<sf::Vector2i> considered;
+
     while (window.isOpen())
     {
         sf::Event event;
@@ -114,7 +118,22 @@ int main()
                 if(event.key.code == sf::Keyboard::Right)
                     goal.x += 1;
 
+                moved = true;
             }
+        }
+
+        if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        {
+            start.x = (int)sf::Mouse::getPosition(window).x/32+1;
+            start.y = (int)sf::Mouse::getPosition(window).y/32+1;
+            moved = true;
+        }
+
+        if(sf::Mouse::isButtonPressed(sf::Mouse::Right))
+        {
+            goal.x = (int)sf::Mouse::getPosition(window).x/32+1;
+            goal.y = (int)sf::Mouse::getPosition(window).y/32+1;
+            moved = true;
         }
 
         if (start.x < 1)  { start.x = 1; }
@@ -122,15 +141,25 @@ int main()
         if (start.y < 1)  { start.y = 1; }
         if (start.y > 20) { start.y = 20;}
 
+        if (goal.x < 1)  { goal.x = 1; }
+        if (goal.x > 20) { goal.x = 20;}
+        if (goal.y < 1)  { goal.y = 1; }
+        if (goal.y > 20) { goal.y = 20;}
+
         std::vector<std::vector<int>> grid = createGrid(baseGrid);
         grid[start.y-1][start.x-1] = 2;
 
-        PathFinder pathfinder(grid, 20, 20);
-        pathfinder.setStart(start.x, start.y);
-        pathfinder.setGoal(goal.x, goal.y);
-        std::vector<sf::Vector2i> path = pathfinder.find();
+        if(moved)
+        {
+            PathFinder pathfinder(grid, 20, 20);
+            pathfinder.setStart(start.x, start.y);
+            pathfinder.setGoal(goal.x, goal.y);
+            path = pathfinder.find();
+            considered = pathfinder.consideredList;
+            moved = false;
+        }
 
-        for(sf::Vector2i point : pathfinder.consideredList)
+        for(sf::Vector2i point : considered)
             grid[point.y-1][point.x-1] = 5;
 
         for(sf::Vector2i point : path)

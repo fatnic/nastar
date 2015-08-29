@@ -9,7 +9,6 @@ PathFinder::PathFinder(std::vector<std::vector<int> > grid, int x, int y)
     , ySize(y)
     , finalPath()
 {
-
 }
 
 void PathFinder::setStart(int x, int y)
@@ -31,8 +30,6 @@ std::vector<sf::Vector2i> PathFinder::find()
     {
         std::sort(openList.begin(), openList.end(), sortNodes);
         current = openList[0];
-        openList.erase(openList.begin());
-        closedList.push_back(current);
 
         if(current->equals(goal))
         {
@@ -44,9 +41,12 @@ std::vector<sf::Vector2i> PathFinder::find()
             }
 
             clearLists();
-
+            std::reverse(finalPath.begin(), finalPath.end());
             return finalPath;
         }
+
+        openList.erase(openList.begin());
+        closedList.push_back(current);
 
         for(int i = 0; i < 9; i++)
         {
@@ -58,23 +58,38 @@ std::vector<sf::Vector2i> PathFinder::find()
             int xi = (i % 3) - 1;
             int yi = (i / 3) - 1;
 
-            sf::Vector2i cCell(x + xi, y + yi);
+            sf::Vector2i neighbour(x + xi, y + yi);
 
-            if(blocked(cCell)) continue;
+            if(blocked(neighbour)) continue;
+            if(vectorInList(closedList, neighbour)) continue;
 
-            float G = distance(start, cCell);
-            float H = manhattenDistance(cCell, goal);
+            float G = distance(current->cell, neighbour);
+            float H = manhattenDistance(neighbour, goal);
 
-            if(vectorInList(closedList, cCell)) continue;
-
-            if(!vectorInList(openList, cCell) || current->F + 1 + H < G)
+            if(!vectorInList(openList, neighbour))
             {
-                consideredList.push_back(cCell);
-                PathNode *newNode = new PathNode(cCell, current, G, H);
+                consideredList.push_back(neighbour);
+                PathNode *newNode = new PathNode(neighbour, current, G, H);
                 openList.push_back(newNode);
+            }
+            else
+            {
+                for(PathNode *node : openList)
+                {
+                    if(node->equals(neighbour))
+                    {
+                        if(G + H < node->F)
+                        {
+                            node->G = G;
+                            node->H = H;
+                            node->parent = current;
+                        }
+                    }
+                }
             }
         }
     }
+
     clearLists();
     return finalPath;
 }

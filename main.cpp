@@ -48,6 +48,7 @@ std::vector<sf::RectangleShape> createCells(std::vector<std::vector<int>> grid)
             rect.setSize(sf::Vector2f(gridSize, gridSize));
             rect.setPosition(sf::Vector2f(gridSize * i, gridSize * y));
             rect.setOutlineColor(sf::Color(64,64,64));
+            rect.setOutlineThickness(1.f);
             switch(row[i])
             {
             case 1:
@@ -61,6 +62,9 @@ std::vector<sf::RectangleShape> createCells(std::vector<std::vector<int>> grid)
                 break;
             case 4:
                 rect.setFillColor(sf::Color::Red);
+                break;
+            case 5:
+                rect.setFillColor(sf::Color::White);
                 break;
             default:
                 rect.setFillColor(sf::Color::Black);
@@ -100,6 +104,16 @@ int main()
                     start.x -= 1;
                 if(event.key.code == sf::Keyboard::D)
                     start.x += 1;
+
+                if(event.key.code == sf::Keyboard::Up)
+                    goal.y -= 1;
+                if(event.key.code == sf::Keyboard::Down)
+                    goal.y += 1;
+                if(event.key.code == sf::Keyboard::Left)
+                    goal.x -= 1;
+                if(event.key.code == sf::Keyboard::Right)
+                    goal.x += 1;
+
             }
         }
 
@@ -108,23 +122,17 @@ int main()
         if (start.y < 1)  { start.y = 1; }
         if (start.y > 20) { start.y = 20;}
 
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-        {
-            float x = sf::Mouse::getPosition(window).x;
-            float y = sf::Mouse::getPosition(window).y;
-
-            goal.x = (int)x / 32;
-            goal.y = (int)y / 32;
-        }
-
         std::vector<std::vector<int>> grid = createGrid(baseGrid);
         grid[start.y-1][start.x-1] = 2;
         grid[goal.y-1][goal.x-1] = 3;
 
-        PathFinder pathfinder(grid, 32, 32);
+        PathFinder pathfinder(grid, 20, 20);
         pathfinder.setStart(start.x, start.y);
         pathfinder.setGoal(goal.x, goal.y);
         std::vector<sf::Vector2i> path = pathfinder.find();
+
+        for(sf::Vector2i point : pathfinder.consideredList)
+            grid[point.y-1][point.x-1] = 5;
 
         for(sf::Vector2i point : path)
             grid[point.y-1][point.x-1] = 4;

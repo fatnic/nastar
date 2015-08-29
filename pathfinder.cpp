@@ -42,6 +42,9 @@ std::vector<sf::Vector2i> PathFinder::find()
                 finalPath.push_back(current->cell);
                 current = current->parent;
             }
+
+            clearLists();
+
             return finalPath;
         }
 
@@ -66,11 +69,13 @@ std::vector<sf::Vector2i> PathFinder::find()
 
             if(!vectorInList(openList, cCell) && G >= current->G)
             {
+                consideredList.push_back(cCell);
                 PathNode *newNode = new PathNode(cCell, current, G, H);
                 openList.push_back(newNode);
             }
         }
     }
+    clearLists();
     return finalPath;
 }
 
@@ -89,15 +94,11 @@ bool PathFinder::sortNodes(PathNode* n0, PathNode* n1)
 bool PathFinder::blocked(sf::Vector2i cell)
 {
     if (cell.x < 1 || cell.x > xSize || cell.y < 1 || cell.y > ySize)
-    {
         return true;
-    }
 
     int cellValue = grid[cell.y-1][cell.x-1];
     if (cellValue == 1)
-    {
         return true;
-    }
 
     return false;
 }
@@ -108,9 +109,19 @@ bool PathFinder::vectorInList(std::vector<PathNode*> list, sf::Vector2i cell)
     {
         PathNode node = *list[i];
         if(node.cell.x == cell.x && node.cell.y == cell.y)
-        {
             return true;
-        }
     }
     return false;
+}
+
+void PathFinder::clearLists()
+{
+    for(auto& node : openList)
+        delete node;
+
+    for(auto& node : closedList)
+        delete node;
+
+    openList.clear();
+    closedList.clear();
 }

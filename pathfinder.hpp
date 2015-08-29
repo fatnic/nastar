@@ -17,6 +17,7 @@ public:
     void setStart(int x, int y);
     void setGoal(int x, int y);
     std::vector<sf::Vector2i> find();
+    std::vector<sf::Vector2i> consideredList;
 private:
     float distance(sf::Vector2i cell0, sf::Vector2i cell1);
     static bool sortNodes(PathNode *n0, PathNode *n1);
@@ -31,6 +32,7 @@ private:
     std::vector<PathNode*> openList;
     std::vector<PathNode*> closedList;
     std::vector<sf::Vector2i> finalPath;
+    void clearLists();
 };
 
 #endif // PATHFINDER_HPP

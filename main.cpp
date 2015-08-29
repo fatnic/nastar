@@ -83,8 +83,8 @@ int main()
 
     std::vector<std::string> baseGrid = getBaseGrid("assets/grid.txt");
 
-    sf::Vector2i start(2,2);
-    sf::Vector2i goal(18,18);
+    sf::Vector2i start(10,18);
+    sf::Vector2i goal(16,7);
 
     while (window.isOpen())
     {
@@ -124,7 +124,6 @@ int main()
 
         std::vector<std::vector<int>> grid = createGrid(baseGrid);
         grid[start.y-1][start.x-1] = 2;
-        grid[goal.y-1][goal.x-1] = 3;
 
         PathFinder pathfinder(grid, 20, 20);
         pathfinder.setStart(start.x, start.y);
@@ -136,6 +135,8 @@ int main()
 
         for(sf::Vector2i point : path)
             grid[point.y-1][point.x-1] = 4;
+
+        grid[goal.y-1][goal.x-1] = 3;
 
         std::vector<sf::RectangleShape> cells = createCells(grid);
 

@@ -7,6 +7,7 @@ PathFinder::PathFinder(std::vector<std::vector<int> > grid, int x, int y)
     : grid(grid)
     , xSize(x)
     , ySize(y)
+    , finalPath()
 {
 
 }
@@ -23,68 +24,53 @@ void PathFinder::setGoal(int x, int y)
 
 std::vector<sf::Vector2i> PathFinder::find()
 {
-    PathNode current(start, nullptr, 0.f, distance(start, goal));
+    PathNode *current = new PathNode(start, nullptr, 0.f, distance(start, goal));
     openList.push_back(current);
 
     while(!openList.empty())
     {
-//        std::sort(openList.begin(), openList.end(), sortNodes);
-        openList.sort(sortNodes);
-        current = openList.front();
+        std::sort(openList.begin(), openList.end(), sortNodes);
+        current = openList[0];
         openList.erase(openList.begin());
         closedList.push_back(current);
 
-        if(current.parent != nullptr)
+        if(current->equals(goal))
         {
-            std::cout << "I'm am currently (" << current.cell.x << ":" << current.cell.y <<") and my parent is (";
-            std::cout << current.parent->cell.x << ":" << current.parent->cell.y << ")\n";
-        }
 
-        if(current.equals(goal))
-        {
-            std::cout << "found\n";
-            while(current.parent != nullptr)
+            while(current->parent != nullptr)
             {
-                finalPath.push_back(current.cell);
-                current = *current.parent;
+                finalPath.push_back(current->cell);
+                current = current->parent;
             }
             return finalPath;
         }
 
-        for (int i = 0; i < 9; i++)
+        for(int i = 0; i < 9; i++)
         {
-            if (i == 4)
-                continue;
+            if (i == 4) continue;
 
-            int x = current.cell.x;
-            int y = current.cell.y;
+            int x = current->cell.x;
+            int y = current->cell.y;
 
             int xi = (i % 3) - 1;
             int yi = (i / 3) - 1;
 
             sf::Vector2i cCell(x + xi, y + yi);
 
-            if (blocked(cCell))
-                continue;
+            if(blocked(cCell)) continue;
 
             float G = distance(start, cCell);
             float H = distance(cCell, goal);
 
-            if(vectorInList(closedList, cCell))
-            {
-                continue;
-            }
+            if(vectorInList(closedList, cCell)) continue;
 
-            if(!vectorInList(openList, cCell)  && G >= current.G)
+            if(!vectorInList(openList, cCell) && G >= current->G)
             {
-                PathNode newNode(cCell, &current, G, H);
+                PathNode *newNode = new PathNode(cCell, current, G, H);
                 openList.push_back(newNode);
             }
         }
-
     }
-
-    closedList.clear();
     return finalPath;
 }
 
@@ -95,20 +81,20 @@ float PathFinder::distance(sf::Vector2i cell0, sf::Vector2i cell1)
     return std::sqrt(dX * dX + dY * dY);
 }
 
-bool PathFinder::sortNodes(PathNode n0, PathNode n1)
+bool PathFinder::sortNodes(PathNode* n0, PathNode* n1)
 {
-    return (n0.F < n1.F);
+    return (n0->F < n1->F);
 }
 
 bool PathFinder::blocked(sf::Vector2i cell)
 {
-    int cellValue = grid[cell.y-1][cell.x-1];
-    if (cellValue == 1)
+    if (cell.x < 1 || cell.x > xSize || cell.y < 1 || cell.y > ySize)
     {
         return true;
     }
 
-    if (cell.x < 1 || cell.x > xSize || cell.y < 1 || cell.y > ySize)
+    int cellValue = grid[cell.y-1][cell.x-1];
+    if (cellValue == 1)
     {
         return true;
     }
@@ -116,11 +102,12 @@ bool PathFinder::blocked(sf::Vector2i cell)
     return false;
 }
 
-bool PathFinder::vectorInList(std::list<PathNode> list, sf::Vector2i node)
+bool PathFinder::vectorInList(std::vector<PathNode*> list, sf::Vector2i cell)
 {
-    for (PathNode& cell : list)
+    for (int i = 0; i < list.size(); i++)
     {
-        if (cell.equals(node))
+        PathNode node = *list[i];
+        if(node.cell.x == cell.x && node.cell.y == cell.y)
         {
             return true;
         }

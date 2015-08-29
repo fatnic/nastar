@@ -19,18 +19,17 @@ public:
     std::vector<sf::Vector2i> find();
 private:
     float distance(sf::Vector2i cell0, sf::Vector2i cell1);
-    static bool sortNodes(PathNode n0, PathNode n1);
+    static bool sortNodes(PathNode *n0, PathNode *n1);
     bool blocked(sf::Vector2i cell);
-    bool vectorInList(std::list<PathNode> list, sf::Vector2i node);
+    bool vectorInList(std::vector<PathNode *> list, sf::Vector2i cell);
     std::vector<std::vector<int>> grid;
     int xSize;
     int ySize;
-    sf::RenderWindow* window;
     sf::Vector2i start;
     sf::Vector2i goal;
     PathNode current;
-    std::list<PathNode*> openList;
-    std::list<PathNode*> closedList;
+    std::vector<PathNode*> openList;
+    std::vector<PathNode*> closedList;
     std::vector<sf::Vector2i> finalPath;
 };
 

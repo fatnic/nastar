@@ -3,7 +3,7 @@
 #include <iostream>
 #include <stdlib.h>
 
-PathFinder::PathFinder(std::vector<std::vector<int> > grid, int x, int y)
+PathFinder::PathFinder(std::vector<std::vector<int>> grid, int x, int y)
     : grid(grid)
     , xSize(x)
     , ySize(y)
@@ -61,10 +61,11 @@ std::vector<sf::Vector2i> PathFinder::find()
             sf::Vector2i neighbour(x + xi, y + yi);
 
             if(blocked(neighbour)) continue;
-            if(vectorInList(closedList, neighbour)) continue;
 
             float G = distance(current->cell, neighbour);
             float H = manhattenDistance(neighbour, goal);
+
+            if(vectorInList(closedList, neighbour) && G >= current->G) continue;
 
             if(!vectorInList(openList, neighbour))
             {
@@ -76,14 +77,11 @@ std::vector<sf::Vector2i> PathFinder::find()
             {
                 for(PathNode *node : openList)
                 {
-                    if(node->equals(neighbour))
+                    if(node->equals(neighbour) && G + H < node->F)
                     {
-                        if(G + H < node->F)
-                        {
-                            node->G = G;
-                            node->H = H;
-                            node->parent = current;
-                        }
+                        node->G = G;
+                        node->H = H;
+                        node->parent = current;
                     }
                 }
             }

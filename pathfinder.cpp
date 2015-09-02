@@ -48,19 +48,66 @@ std::vector<sf::Vector2i> PathFinder::find()
         openList.erase(openList.begin());
         closedList.push_back(current);
 
+        bool neighbours[9];
+        for(int i = 0; i < 9; i++)
+            neighbours[i] = true;
+        neighbours[4] = false;
+
+        int x = current->cell.x;
+        int y = current->cell.y;
+
         for(int i = 0; i < 9; i++)
         {
-            if (i == 4) continue;
-
-            int x = current->cell.x;
-            int y = current->cell.y;
+            if(neighbours[i] == false) continue;
 
             int xi = (i % 3) - 1;
             int yi = (i / 3) - 1;
 
             sf::Vector2i neighbour(x + xi, y + yi);
 
-            if(blocked(neighbour)) continue;
+            if(i == 1 && blocked(neighbour))
+            {
+                neighbours[0] = false;
+                neighbours[1] = false;
+                neighbours[2] = false;
+                continue;
+            }
+
+            if(i == 3 && blocked(neighbour))
+            {
+                neighbours[0] = false;
+                neighbours[3] = false;
+                neighbours[6] = false;
+                continue;
+            }
+
+            if(i == 5 && blocked(neighbour))
+            {
+                neighbours[2] = false;
+                neighbours[5] = false;
+                neighbours[8] = false;
+                continue;
+            }
+
+            if(i == 7 && blocked(neighbour))
+            {
+                neighbours[6] = false;
+                neighbours[7] = false;
+                neighbours[8] = false;
+                continue;
+            }
+
+            if(blocked(neighbour)) neighbours[i] = false;
+        }
+
+        for(int i=0; i < 9; i++)
+        {
+            if(neighbours[i] == false) continue;
+
+            int xi = (i % 3) - 1;
+            int yi = (i / 3) - 1;
+
+            sf::Vector2i neighbour(x + xi, y + yi);
 
             float G = distance(current->cell, neighbour);
             float H = manhattenDistance(neighbour, goal);
@@ -86,6 +133,7 @@ std::vector<sf::Vector2i> PathFinder::find()
                 }
             }
         }
+
     }
 
     clearLists();

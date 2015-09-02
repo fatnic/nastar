@@ -93,6 +93,8 @@ int main()
     while (window.isOpen())
     {
         sf::Event event;
+        std::vector<std::vector<int>> grid = createGrid(baseGrid);
+
         while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed)
@@ -124,15 +126,26 @@ int main()
 
         if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
         {
-            start.x = (int)sf::Mouse::getPosition(window).x/32+1;
-            start.y = (int)sf::Mouse::getPosition(window).y/32+1;
+            int x = (int)sf::Mouse::getPosition(window).x/32+1;
+            int y = (int)sf::Mouse::getPosition(window).y/32+1;
+
+            if(x < 1 || y < 1 || x > 20 || y > 20 || grid[y-1][x-1] == 1)
+                continue;
+
+            start.x = x; start.y = y;
             moved = true;
+
         }
 
         if(sf::Mouse::isButtonPressed(sf::Mouse::Right))
         {
-            goal.x = (int)sf::Mouse::getPosition(window).x/32+1;
-            goal.y = (int)sf::Mouse::getPosition(window).y/32+1;
+            int x = (int)sf::Mouse::getPosition(window).x/32+1;
+            int y = (int)sf::Mouse::getPosition(window).y/32+1;
+
+            if(x < 1 || y < 1 || x > 20 || y > 20 || grid[y-1][x-1] == 1)
+                continue;
+
+            goal.x = x; goal.y = y;
             moved = true;
         }
 
@@ -146,7 +159,6 @@ int main()
         if (goal.y < 1)  { goal.y = 1; }
         if (goal.y > 20) { goal.y = 20;}
 
-        std::vector<std::vector<int>> grid = createGrid(baseGrid);
         grid[start.y-1][start.x-1] = 2;
 
         if(moved)

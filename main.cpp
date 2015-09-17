@@ -1,42 +1,12 @@
 #include <iostream>
 #include <vector>
-#include <fstream>
-#include <sstream>
 
 #include <SFML/Graphics.hpp>
 #include "pathfinder.hpp"
 
-std::vector<std::string> getBaseGrid(std::string filename)
+std::vector<sf::RectangleShape> createCells(std::vector<std::vector<int>> grid, int cellSize)
 {
-    std::vector<std::string> basegrid;
-    std::ifstream infile(filename);
-    std::string line;
-    while(std::getline(infile, line))
-        basegrid.push_back(line);
-    return basegrid;
-}
-
-std::vector<std::vector<int>> createGrid(std::vector<std::string> baseGrid)
-{
-    std::vector<std::vector<int>> grid;
-    std::vector<int> row;
-
-    for(std::string line : baseGrid)
-    {
-        for(char& c: line)
-        {
-            int ic = c - '0';
-            row.push_back(ic);
-        }
-        grid.push_back(row);
-        row.clear();
-    }
-    return grid;
-}
-
-std::vector<sf::RectangleShape> createCells(std::vector<std::vector<int>> grid)
-{
-    int gridSize = 32;
+    int gridSize = cellSize;
     int y = 0;
 
     std::vector<sf::RectangleShape> cells;
@@ -47,7 +17,7 @@ std::vector<sf::RectangleShape> createCells(std::vector<std::vector<int>> grid)
             sf::RectangleShape rect;
             rect.setSize(sf::Vector2f(gridSize, gridSize));
             rect.setPosition(sf::Vector2f(gridSize * i, gridSize * y));
-            rect.setOutlineColor(sf::Color(64,64,64));
+            rect.setOutlineColor(sf::Color(64,64,64,30));
             rect.setOutlineThickness(1.f);
             switch(row[i])
             {
@@ -77,23 +47,35 @@ std::vector<sf::RectangleShape> createCells(std::vector<std::vector<int>> grid)
     return cells;
 }
 
+std::vector<std::vector<int>> getBaseGrid(int grid_max_x, int grid_max_y)
+{
+    std::vector<std::vector<int>> grid;
+    for(int i = 0; i < grid_max_y; i++)
+        grid.push_back(std::vector<int>(grid_max_x));
+    return grid;
+}
+
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(640, 640), "GameWindow");
-
-    std::vector<std::string> baseGrid = getBaseGrid("assets/grid.txt");
+    int grid_max_x = 50;
+    int grid_max_y = 30;
+    int cell_size = 16;
+    bool moved = true;
+    bool cut_corners = true;
 
     sf::Vector2i start(10,18);
     sf::Vector2i goal(16,7);
 
-    bool moved = true;
     std::vector<sf::Vector2i> path;
     std::vector<sf::Vector2i> considered;
+    std::vector<sf::Vector2i> walls;
+
+    sf::RenderWindow window(sf::VideoMode(grid_max_x * cell_size, grid_max_y * cell_size), "GameWindow");
 
     while (window.isOpen())
     {
         sf::Event event;
-        std::vector<std::vector<int>> grid = createGrid(baseGrid);
+        std::vector<std::vector<int>> grid = getBaseGrid(grid_max_x, grid_max_y);
 
         while (window.pollEvent(event))
         {
@@ -120,52 +102,66 @@ int main()
                 if(event.key.code == sf::Keyboard::Right)
                     goal.x += 1;
 
+                if(event.key.code == sf::Keyboard::Escape)
+                    window.close();
+                if(event.key.code == sf::Keyboard::C)
+                    walls.clear();
+                if(event.key.code == sf::Keyboard::Z)
+                    cut_corners = !cut_corners;
+
                 moved = true;
             }
         }
 
         if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
         {
-            int x = (int)sf::Mouse::getPosition(window).x/32+1;
-            int y = (int)sf::Mouse::getPosition(window).y/32+1;
+            int x = (int)sf::Mouse::getPosition(window).x / cell_size + 1;
+            int y = (int)sf::Mouse::getPosition(window).y / cell_size + 1;
 
-            if(x < 1 || y < 1 || x > 20 || y > 20 || grid[y-1][x-1] == 1)
+            if(x < 1 || y < 1 || x > grid_max_x || y > grid_max_y || grid[y-1][x-1] == 1)
                 continue;
 
-            start.x = x; start.y = y;
+            walls.push_back(sf::Vector2i(x,y));
             moved = true;
-
         }
 
         if(sf::Mouse::isButtonPressed(sf::Mouse::Right))
         {
-            int x = (int)sf::Mouse::getPosition(window).x/32+1;
-            int y = (int)sf::Mouse::getPosition(window).y/32+1;
+            int x = (int)sf::Mouse::getPosition(window).x / cell_size + 1;
+            int y = (int)sf::Mouse::getPosition(window).y / cell_size + 1;
 
-            if(x < 1 || y < 1 || x > 20 || y > 20 || grid[y-1][x-1] == 1)
+            if(x < 1 || y < 1 || x > grid_max_x || y > grid_max_y || grid[y-1][x-1] == 1)
                 continue;
-
-            goal.x = x; goal.y = y;
+            for(std::size_t i = 0; i < walls.size(); i++ )
+            {
+                sf::Vector2i wall = walls[i];
+                if(wall.x == x && wall.y == y)
+                    walls.erase(walls.begin() + i);
+            }
             moved = true;
         }
 
         if (start.x < 1)  { start.x = 1; }
-        if (start.x > 20) { start.x = 20;}
+        if (start.x > grid_max_x) { start.x = grid_max_x;}
         if (start.y < 1)  { start.y = 1; }
-        if (start.y > 20) { start.y = 20;}
+        if (start.y > grid_max_x) { start.y = grid_max_x;}
 
         if (goal.x < 1)  { goal.x = 1; }
-        if (goal.x > 20) { goal.x = 20;}
+        if (goal.x > grid_max_x) { goal.x = grid_max_x;}
         if (goal.y < 1)  { goal.y = 1; }
-        if (goal.y > 20) { goal.y = 20;}
+        if (goal.y > grid_max_x) { goal.y = grid_max_x;}
 
         grid[start.y-1][start.x-1] = 2;
 
+        for(sf::Vector2i& wall : walls)
+            grid[wall.y-1][wall.x-1] = 1;
+
         if(moved)
         {
-            PathFinder pathfinder(grid, 20, 20);
+            PathFinder pathfinder(grid, grid_max_x, grid_max_y);
             pathfinder.setStart(start.x, start.y);
             pathfinder.setGoal(goal.x, goal.y);
+            pathfinder.skipCorners = cut_corners;
             path = pathfinder.find();
             considered = pathfinder.consideredList;
             moved = false;
@@ -179,7 +175,7 @@ int main()
 
         grid[goal.y-1][goal.x-1] = 3;
 
-        std::vector<sf::RectangleShape> cells = createCells(grid);
+        std::vector<sf::RectangleShape> cells = createCells(grid, cell_size);
 
         window.clear();
 

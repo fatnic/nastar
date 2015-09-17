@@ -9,5 +9,4 @@ SOURCES += main.cpp \
     pathfinder.cpp
 
 HEADERS += \
-    pathfinder.hpp \
-    pathnode.hpp
+    pathfinder.hpp

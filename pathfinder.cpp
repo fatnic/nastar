@@ -3,10 +3,10 @@
 #include <iostream>
 #include <stdlib.h>
 
-PathFinder::PathFinder(std::vector<std::vector<int>> grid, int x, int y)
+PathFinder::PathFinder(std::vector<std::vector<int>> grid, int grid_size_x, int grid_size_y)
     : grid(grid)
-    , xSize(x)
-    , ySize(y)
+    , xSize(grid_size_x)
+    , ySize(grid_size_y)
     , finalPath()
     , skipCorners(true)
 {

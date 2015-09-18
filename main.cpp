@@ -1,6 +1,5 @@
 #include <iostream>
 #include <vector>
-
 #include <SFML/Graphics.hpp>
 #include "pathfinder.hpp"
 
@@ -17,7 +16,7 @@ std::vector<sf::RectangleShape> createCells(std::vector<std::vector<int>> grid, 
             sf::RectangleShape rect;
             rect.setSize(sf::Vector2f(gridSize, gridSize));
             rect.setPosition(sf::Vector2f(gridSize * i, gridSize * y));
-            rect.setOutlineColor(sf::Color(64,64,64,30));
+            rect.setOutlineColor(sf::Color(64,64,64));
             rect.setOutlineThickness(1.f);
             switch(row[i])
             {
@@ -57,14 +56,17 @@ std::vector<std::vector<int>> getBaseGrid(int grid_max_x, int grid_max_y)
 
 int main()
 {
-    int grid_max_x = 50;
-    int grid_max_y = 30;
-    int cell_size = 16;
+    int cell_size = 24;
+    int grid_max_x = 800 / cell_size;
+    int grid_max_y = 600 / cell_size;
     bool moved = true;
     bool cut_corners = true;
+    bool recalc = true;
 
-    sf::Vector2i start(10,18);
-    sf::Vector2i goal(16,7);
+    sf::Clock clock;
+
+    sf::Vector2i start(1, grid_max_y / 2);
+    sf::Vector2i goal(grid_max_x, grid_max_y / 2);
 
     std::vector<sf::Vector2i> path;
     std::vector<sf::Vector2i> considered;
@@ -108,6 +110,8 @@ int main()
                     walls.clear();
                 if(event.key.code == sf::Keyboard::Z)
                     cut_corners = !cut_corners;
+                if(event.key.code == sf::Keyboard::G)
+                    recalc = !recalc;
 
                 moved = true;
             }
@@ -156,7 +160,7 @@ int main()
         for(sf::Vector2i& wall : walls)
             grid[wall.y-1][wall.x-1] = 1;
 
-        if(moved)
+        if(recalc)
         {
             PathFinder pathfinder(grid, grid_max_x, grid_max_y);
             pathfinder.setStart(start.x, start.y);
@@ -165,13 +169,14 @@ int main()
             path = pathfinder.find();
             considered = pathfinder.consideredList;
             moved = false;
+
+            for(sf::Vector2i point : considered)
+                grid[point.y-1][point.x-1] = 5;
+
+            for(sf::Vector2i point : path)
+                grid[point.y-1][point.x-1] = 4;
         }
 
-        for(sf::Vector2i point : considered)
-            grid[point.y-1][point.x-1] = 5;
-
-        for(sf::Vector2i point : path)
-            grid[point.y-1][point.x-1] = 4;
 
         grid[goal.y-1][goal.x-1] = 3;
 
@@ -183,6 +188,7 @@ int main()
             window.draw(rect);
 
         window.display();
+        std::cout << 1 / clock.restart().asSeconds() << std::endl;
     }
 
     return 0;

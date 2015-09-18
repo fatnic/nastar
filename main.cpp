@@ -13,6 +13,8 @@ std::vector<sf::RectangleShape> createCells(std::vector<std::vector<int>> grid, 
     {
         for(unsigned int i = 0; i < row.size(); i++ )
         {
+            if(row[i] == 0) continue;
+
             sf::RectangleShape rect;
             rect.setSize(sf::Vector2f(gridSize, gridSize));
             rect.setPosition(sf::Vector2f(gridSize * i, gridSize * y));
@@ -36,7 +38,6 @@ std::vector<sf::RectangleShape> createCells(std::vector<std::vector<int>> grid, 
                 rect.setFillColor(sf::Color::White);
                 break;
             default:
-                rect.setFillColor(sf::Color::Black);
                 break;
             }
             cells.push_back(rect);
@@ -56,7 +57,7 @@ std::vector<std::vector<int>> getBaseGrid(int grid_max_x, int grid_max_y)
 
 int main()
 {
-    int cell_size = 24;
+    int cell_size = 16;
     int grid_max_x = 800 / cell_size;
     int grid_max_y = 600 / cell_size;
     bool moved = true;
@@ -176,7 +177,6 @@ int main()
             for(sf::Vector2i point : path)
                 grid[point.y-1][point.x-1] = 4;
         }
-
 
         grid[goal.y-1][goal.x-1] = 3;
 
